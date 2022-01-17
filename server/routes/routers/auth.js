@@ -3059,7 +3059,7 @@ module.exports = (app, db) => {
   }))
   app.get("/allsubcategory", asyncHandler(async (req, res, next) => {
     subcat.findAll().then((s, err) => {
-      // console.log("s,", s)
+      console.log("s,", s)
       return res.status(200).send(s)
     })
   }))
