@@ -48,7 +48,7 @@ var filestorage = multer.diskStorage({
     cb(null, __basedir + "/server/routes/routers/uploads/e/");
   },
   filename: (req, file, cb) => {
-    console.log(file.originalname);
+    // console.log(file.originalname);
     cb(null, `${Date.now()}-bezkoder-${file.originalname}`);
   },
 });
@@ -73,14 +73,14 @@ module.exports = (app, db) => {
       let mobileNumber = req.body.mobileNumber;
       let password = req.body.password;
 
-      console.log(firstname);
-      console.log(lastname);
-      console.log(mobileNumber);
-      console.log(password);
+      // console.log(firstname);
+      // console.log(lastname);
+      // console.log(mobileNumber);
+      // console.log(password);
 
       // hashing password
       const hashedPassword = await bcrypt.hash(password, 10);
-      console.log('This is the password', hashedPassword);
+      // console.log('This is the password', hashedPassword);
       try {
         const user = await users.create({
           firstname: firstname,
@@ -118,7 +118,7 @@ module.exports = (app, db) => {
 
     // hashing password
     const hashedPassword = await bcrypt.hash(password, 10);
-    console.log('This is the password', hashedPassword);
+    // console.log('This is the password', hashedPassword);
     try {
       vendor.create({
         firstname: firstName,
@@ -135,7 +135,7 @@ module.exports = (app, db) => {
         long: long
 
       }).then((s) => {
-        console.log(s);
+        // console.log(s);
         if (s) {
           sendTokenResponse(s, 200, res);
         }
@@ -163,7 +163,7 @@ module.exports = (app, db) => {
 
     // hashing password
     const hashedPassword = await bcrypt.hash(password, 10);
-    console.log('This is the password', hashedPassword);
+    // console.log('This is the password', hashedPassword);
     try {
       Admin.create({
         firstname: firstName,
@@ -178,7 +178,7 @@ module.exports = (app, db) => {
         state: state
 
       }).then((s) => {
-        console.log(s);
+        // console.log(s);
         if (s) {
           sendTokenResponse(s, 200, res);
         }
@@ -253,7 +253,7 @@ module.exports = (app, db) => {
 
   app.post('/login', async function (req, res, next) {
     const { email_Id, password } = req.body;
-    console.log(email_Id);
+    // console.log(email_Id);
     //validation email and password
     if (!email_Id || !password) {
       return res.status(400).send("Please provide email and password");
@@ -263,7 +263,7 @@ module.exports = (app, db) => {
       if (!user) {
         return res.status(400).send("Please provide email and password");
       }
-      console.log(user);
+      // console.log(user);
       //check if password matchs
       //let hashedPassword = await bcrypt.hash(password, 10);
       bcrypt.compare(password, user.password).then((bool) => {
@@ -298,7 +298,7 @@ module.exports = (app, db) => {
   //get token from model, create a cookie, send res
   const sendTokenResponse = (user, statusCode, res) => {
     const token = jwt.sign({ user }, process.env.JWT_SECRET);
-    console.log(token);
+    // console.log(token);
     // persist the token as 't' in cookie with expiry date
     res.cookie('t', token, { expire: new Date() + 9999 });
 
@@ -330,7 +330,7 @@ module.exports = (app, db) => {
         });
       })
       .catch(function (err) {
-        console.log('coming from error');
+        // console.log('coming from error');
         res.json(err);
       });
   });
@@ -348,11 +348,11 @@ module.exports = (app, db) => {
       let password = req.body.password;
       let Id = req.body.Id;
       let newpassword = req.body.newpassword;
-      console.log(password);
-      console.log(Id);
-      console.log(newpassword);
+      // console.log(password);
+      // console.log(Id);
+      // console.log(newpassword);
       await users.findOne({ where: { userId: Id } }).then(async (s, err) => {
-        console.log("enter");
+        // console.log("enter");
         if (!s) {
           return res.status(404).send(err)
         }
@@ -360,9 +360,9 @@ module.exports = (app, db) => {
         if (s) {
 
           let psd = s.password;
-          console.log(psd);
+          // console.log(psd);
           await bcrypt.compare(password, psd).then(async (bool) => {
-            console.log(bool);
+            // console.log(bool);
             if (bool == false) {
               return res.status(404).send("invalid password")
             }
@@ -420,21 +420,36 @@ module.exports = (app, db) => {
 
     })
   })
-  app.post("/additem", parser.array("image", 2), asyncHandler(async (req, res, next) => {
+  app.post("/additem", asyncHandler(async (req, res, next) => {
     //veg-npn veg omage
-    console.log(req.files)
-    console.log(req.body.image)
-    console.log(typeof (req.body.image)) // to see what is returned to you
-    // console.log(req.body.customization);
-    // console.log(typeof (req.body.customization));
-    // console.log((req.body.subcategoryName))
+    //  // console.log(req.files)
+    // let ccat = []
+    // ccat.push(req.body.category)
+
+
+    let sub = []
+    let cat = JSON.parse(req.body.cat)
+    console.log("req.body", req.body);
+    console.log("parse of cat", JSON.parse(req.body.cat))
+    // console.log("req.body.category['categoryName']", req.body.category['categoryName'])
+    // console.log("req.body.category['categoryName']", req.body.category.categoryName)
+
+    let img = req.body.image;
+    let images = img.split(",");
+    // await req.body.category.forEach((e) => { cats.push(JSON.parse(e)) })
+    await req.body.subcategoryName.forEach((e) => { sub.push(JSON.parse(e)) })
+    //  // console.log(req.body.image)
+    //  // console.log(typeof (req.body.image)) // to see what is returned to you
+    //  // console.log(req.body.customization);
+    //  // console.log(typeof (req.body.customization));
+    //  // console.log((req.body.subcategoryName))
     let test = false
 
     item.create({
       itemname: req.body.itemname,
       unit: req.body.unit,
       price: req.body.price,
-      category: req.body.category,
+      category: cat['categoryName'],
       VendorVendorId: req.body.vendorId,
       ingredients: req.body.ingredients,
       isVeg: req.body.isVeg,
@@ -452,25 +467,21 @@ module.exports = (app, db) => {
         return res.status(400).send(err)
       }
       if (s) {
+        //  // console.log("s", s);
         let itemId = s.itemId;
         let userId = req.body.userId;
-        let sub = req.body.subcategoryName;
+
         let customize = req.body.customization
         let m = [];
-        if (req.files) {
-          let files = req.files
-          console.log("files length", req.files.length);
-          for (const file of files) {
+        // console.log("images length", images.length);
+        for (let i = 0; i < images.length; i++) {
 
-            let url = file.path;
-
-
-            await image.create({
-              imagePath: url,
-              itemItemId: itemId
-            })
-          }
+          await image.create({
+            imagePath: images[i],
+            itemItemId: itemId
+          })
         }
+
         await customize.forEach((e) => { m.push(JSON.parse(e)) })
         if (typeof (sub) === "undefined" || sub === null) { return res.status(200).send(s); }
         if (typeof (customize) === "undefined" || customize === null) { return res.status(200).send(s); }
@@ -478,30 +489,30 @@ module.exports = (app, db) => {
           sub.map(element => {
             subcategoryname.create({
               itemItemId: itemId,
-              subcategoryName: element
+              subcategoryName: element.subcategoryName
 
             }).then((sh) => {
               if (sh) {
                 test = true
-                // console.log("res.status(200).send()", test)
+                //  // console.log("res.status(200).send()", test)
 
               }
             })
           });
-          // console.log("customize", customize)
-          // console.log("m", m)
-          // console.log("customize", JSON.parse(customize))
+          //  // console.log("customize", customize)
+          //  // console.log("m", m)
+          //  // console.log("customize", JSON.parse(customize))
           // let cgt = JSON.parse(customize)
           m.map((e) => {
-            // console.log("e", e.name)
-            // console.log("e", e.price)
+            //  // console.log("e", e.name)
+            //  // console.log("e", e.price)
             customization.create({
               Name: e.name,
               Price: e.price,
               itemItemId: itemId,
             }).then((es) => {
               if (es) {
-                // console.log("Es", es)
+                //  // console.log("Es", es)
               }
             })
           })
@@ -509,7 +520,7 @@ module.exports = (app, db) => {
 
 
 
-        // console.log("test", test)
+        //  // console.log("test", test)
         return res.status(200).send(s);
 
 
@@ -536,64 +547,64 @@ module.exports = (app, db) => {
 
     if (lat) {
       await vendor.update({ lat: lat }, { where: { vendorId: vendorId } })
-      console.log("imagedata")
+      // console.log("imagedata")
     }
     if (flatAddress) {
 
       await vendor.update({ flatAddress: flatAddress }, { where: { vendorId: vendorId } })
-      console.log("imagedata")
+      // console.log("imagedata")
     }
     if (long) {
       await vendor.update({ long: long }, { where: { vendorId: vendorId } })
-      console.log("imagedata")
+      // console.log("imagedata")
     }
     if (firstname) {
       await vendor.update({ firstname: firstname }, { where: { vendorId: vendorId } })
-      console.log("imagedata")
+      // console.log("imagedata")
     }
     if (lastname) {
       await vendor.update({ lastname: lastname }, { where: { vendorId: vendorId } })
-      console.log("imagedata")
+      // console.log("imagedata")
     }
     if (mobileNumber) {
       await vendor.update({ mobileNumber: mobileNumber }, { where: { vendorId: vendorId } })
-      console.log("imagedata")
+      // console.log("imagedata")
     }
     if (user_desc) {
       await vendor.update({ user_desc: user_desc }, { where: { vendorId: vendorId } })
-      console.log("imagedata")
+      // console.log("imagedata")
     }
     if (Address) {
       await vendor.update({ Address: Address }, { where: { vendorId: vendorId } })
-      console.log("imagedata")
+      // console.log("imagedata")
     }
     if ((status)) {
       await vendor.update({ status: status }, { where: { vendorId: vendorId } })
-      console.log("imagedata")
+      // console.log("imagedata")
     }
     if ((city)) {
       await vendor.update({ city: city }, { where: { vendorId: vendorId } })
-      console.log("imagedata")
+      // console.log("imagedata")
     } if ((zip)) {
       await vendor.update({ zip: zip }, { where: { vendorId: vendorId } })
-      console.log("imagedata")
+      // console.log("imagedata")
     }
     if ((state)) {
       await vendor.update({ state: state }, { where: { vendorId: vendorId } })
-      console.log("imagedata")
+      // console.log("imagedata")
     }
     if ((req.file)) {
       let imagedata = {};
       imagedata.url = req.file.path;
       imagedata.id = req.file.public_id;
       await vendor.update({ imagePath: imagedata.url }, { where: { vendorId: vendorId } })
-      console.log("imagedata")
+      // console.log("imagedata")
     }
     return res.status(200).send("records updated");
   })
-  app.put("/updateitem", parser.single("image"), async (req, res) => {
+  app.put("/updateitem", parser.single("imageInput"), async (req, res) => {
     try {
-      console.log(JSON.stringify(req.body));
+      // console.log(JSON.stringify(req.body));
       let itemId = req.body.itemId;
       let itemname = req.body.itemname;
       let price = req.body.price;
@@ -614,37 +625,37 @@ module.exports = (app, db) => {
       let customization = req.body.customization;
       if (dateofservice) {
         item.update({ dateofservice: dateofservice }, { where: { itemid: itemId } })
-        console.log("imagedata")
+        // console.log("imagedata")
       }
       if (cooking_time) {
         item.update({ cooking_time: cooking_time }, { where: { itemid: itemId } })
-        console.log("imagedata")
+        // console.log("imagedata")
       }
       if (inStock) {
         item.update({ inStock: inStock }, { where: { itemid: itemId } })
-        console.log("imagedata")
+        // console.log("imagedata")
       }
       if (availabel_from) {
         item.update({ availabel_from: availabel_from }, { where: { itemid: itemId } })
-        console.log("imagedata")
+        // console.log("imagedata")
       }
       if (availabel_to) {
         item.update({ availabel_to: availabel_to }, { where: { itemid: itemId } })
-        console.log("imagedata")
+        // console.log("imagedata")
       }
-      console.log(req.file); // to see what is returned to you
-      console.log(req.body.itemId);
+      // console.log(req.file); // to see what is returned to you
+      // console.log(req.body.itemId);
 
       if (req.file) {
         let imagedata = {};
         imagedata.url = req.file.path;
         imagedata.id = req.file.public_id;
         item.update({ imagePath: imagedata.url }, { where: { itemid: itemId } })
-        console.log("imagedata")
+        // console.log("imagedata")
       }
       if (itemname) {
         item.update({ itemname: itemname }, { where: { itemid: itemId } })
-        console.log("itemname");
+        // console.log("itemname");
       }
       if (unit) {
         item.update({ unit: unit }, { where: { itemid: itemId } })
@@ -691,7 +702,7 @@ module.exports = (app, db) => {
       }
 
       let path = __basedir + "/server/routes/routers/uploads/e/" + req.file.filename;
-      console.log(path);
+      // console.log(path);
       readXlsxFile(path).then((rows) => {
         // skip header
         rows.shift();
@@ -710,12 +721,13 @@ module.exports = (app, db) => {
           }).then((s, err) => {
             if (s) {
               let itemId = s.id;
-              console.log(itemId);
+              // console.log(itemId);
               subcategoryname.create({
                 itemItemId: itemId,
                 subcategoryName: row[1]
               }).then((r, err) => {
-                if (r) { console.log(1) };
+                if (r) {  // console.log(1) 
+                };
                 if (err) { return res.status(400).send(err) }
               })
             } if (err) {
@@ -732,7 +744,7 @@ module.exports = (app, db) => {
 
         // item.bulkCreate(tutorials)
         //   .then((s) => {
-        //     console.log(s);
+        //      // console.log(s);
         //     res.status(200).send({
         //       message: "Uploaded the file successfully: " + req.file.originalname,
         //     });
@@ -745,7 +757,7 @@ module.exports = (app, db) => {
         //   });
       });
     } catch (error) {
-      console.log(error);
+      // console.log(error);
       res.status(500).send({
         message: "Could not upload the file: " + req.file.originalname,
       });
@@ -756,7 +768,7 @@ module.exports = (app, db) => {
   app.get("/userList/:pageno", async (req, res) => {
     try {
       let pageNo = Number(req.params.pageno);
-      //console.log(pageNo);
+      // // console.log(pageNo);
       let userResults = await users.findAndCountAll({
         order: [['created_at', 'DESC']], limit: 5, offset: (pageNo - 1) * 5,
         attributes: ['email_Id', 'firstname', 'userId', 'mobileNumber', 'imagePath', 'created_at']
@@ -785,7 +797,7 @@ module.exports = (app, db) => {
     try {
       let pageNo = Number(req.params.pageno);
       let category = req.params.category;
-      //console.log(pageNo);
+      // // console.log(pageNo);
       let userResults = await subcategoryname.findAndCountAll({
         where: { subcategoryName: category },
         include: {
@@ -805,7 +817,7 @@ module.exports = (app, db) => {
   app.get("/vendorList/:pageno", async (req, res) => {
     try {
       let pageNo = Number(req.params.pageno);
-      //console.log(pageNo);
+      // // console.log(pageNo);
       let userResults = await vendor.findAndCountAll({
         order: [['created_at', 'DESC']], limit: 5, offset: (pageNo - 1) * 5,
         attributes: ['email_Id', 'firstname', 'vendorId', 'status', 'mobileNumber', 'imagePath', 'created_at']
@@ -851,7 +863,7 @@ module.exports = (app, db) => {
     try {
       let pageNo = Number(req.params.pageNo);
       let vendorId = req.params.vendorId;
-      //console.log(pageNo);
+      // // console.log(pageNo);
       let vendorMenuResults = await item.findAndCountAll({
         order: [['created_at', 'DESC']], where: { VendorVendorId: vendorId }
         , limit: 12, offset: (pageNo - 1) * 12
@@ -864,20 +876,22 @@ module.exports = (app, db) => {
   }))
 
   app.post("/vendorMenuItemByCategoryList", asyncHandler(async (req, res, next) => {
-    try {
-      let pageNo = Number(req.body.pageNo);
-      let vendorId = req.body.vendorId;
-      let category = req.body.category;
-      //console.log(pageNo);
-      let vendorMenuResults = await item.findAndCountAll({
-        order: [['created_at', 'DESC']],
-        where: { [Op.and]: [{ VendorVendorId: vendorId }, { category: category }] }, limit: 12, offset: (pageNo - 1) * 12
-      });
-      return res.status(200).send(vendorMenuResults);
-    }
-    catch (err) {
-      return res.status(500).send(err);
-    }
+
+    let pageNo = Number(req.body.pageNo);
+    let vendorId = req.body.vendorId;
+    let category = req.body.category;
+    // // console.log(pageNo);
+    let vendorMenuResults = await item.findAndCountAll({
+      order: [['created_at', 'DESC']],
+      where: { [Op.and]: [{ VendorVendorId: vendorId }, { category: category }] },
+      include: [{
+        model: image
+      }]
+      , limit: 12, offset: (pageNo - 1) * 12
+    });
+    //  // console.log("vendorMenuResults", vendorMenuResults)
+    return res.status(200).send(vendorMenuResults);
+
   }))
 
 
@@ -923,7 +937,7 @@ module.exports = (app, db) => {
 
       //veg-npn veg omage
 
-      console.log(userId);
+      // console.log(userId);
 
       await usercart.create({
 
@@ -931,7 +945,7 @@ module.exports = (app, db) => {
         details: details
       }).then((s) => {
         if (typeof s !== "undefined") {
-          console.log(s);
+          // console.log(s);
           return res.status(200).send(s);
         } else {
           return res.status(500).send("problem")
@@ -952,7 +966,7 @@ module.exports = (app, db) => {
         let b = cartdata[i]["details"];
         await usercart.update({ details: b }, { where: { cartId: s } }).then((s) => {
           if (s) {
-            console.log("updated")
+            // console.log("updated")
           }
         })
       }
@@ -968,7 +982,7 @@ module.exports = (app, db) => {
       let itemsArray = req.body.details;
       let itemsSize = itemsArray.length;
       let userId = req.body.userId;
-      // console.log(JSON.stringify(itemsArray));
+      //  // console.log(JSON.stringify(itemsArray));
       // update quantity of existing items in array
       let activeUserCartDetails = await usercart.findAll({ where: { [Op.and]: [{ userUserId: userId }, { status: 'Active' }] } });
       for (let cartDetail of activeUserCartDetails) {
@@ -981,13 +995,13 @@ module.exports = (app, db) => {
           }
         }
         if (itemsArray.length == 0) {
-          // console.log(JSON.stringify(cartItems));
+          //  // console.log(JSON.stringify(cartItems));
           await usercart.update({ details: cartItems }, { where: { cartId: cartDetail.cartId } });
           return res.status(200).send({ message: 'cart items are updated/added successfully' });
         }
         else if (itemsArray.length < itemsSize) {
           itemsSize = itemsArray.length;
-          // console.log(JSON.stringify(cartItems));
+          //  // console.log(JSON.stringify(cartItems));
           await usercart.update({ details: cartItems }, { where: { cartId: cartDetail.cartId } });
         }
       }
@@ -1018,19 +1032,19 @@ module.exports = (app, db) => {
       }, attributes: ['details']
     }).then((s, err) => {
       if (s && s.length > 0) {
-        //console.log(s);
+        // // console.log(s);
         let itemIDArr = [];
         for (let cartItems of s) {
           let records = JSON.parse(cartItems.details);
-          // console.log(JSON.stringify(records));
+          //  // console.log(JSON.stringify(records));
           let arrrecord = records.map(value => value.itemId);
           for (let ele of arrrecord) {
             itemIDArr.push(ele);
           }
-          // console.log(JSON.stringify(itemIDArr));
+          //  // console.log(JSON.stringify(itemIDArr));
         }
         let intersection = itemIDArr.filter(itemid => itemarray.includes(itemid));
-        // console.log(intersection)
+        //  // console.log(intersection)
         let l = intersection.length;
         if (l > 0) {
           return res.status(200).send(" already present in cart ");
@@ -1045,7 +1059,7 @@ module.exports = (app, db) => {
 
   app.get("/usercart/:userId", asyncHandler(async (req, res, next) => {
     let Id = req.params.userId;
-    console.log(Id);
+    // console.log(Id);
 
     usercart.findAll({
       where: {
@@ -1057,16 +1071,16 @@ module.exports = (app, db) => {
 
       },
     }).then(async (s) => {
-      console.log(s);
+      // console.log(s);
       if (!s) {
         return res.status(404).send("errror")
       } else {
         let len = s.length;
-        console.log(len);
+        // console.log(len);
         for (i = 0; i < len; i++) {
           let eme = s[i]["itemItemId"];
           await item.findAll({ where: { itemId: eme }, attributes: ['imagePath'] }).then((su) => {
-            console.log(su);
+            // console.log(su);
           })
 
         }
@@ -1084,12 +1098,12 @@ module.exports = (app, db) => {
     let itemId = req.body.itemId;
     usercart.findAll({ where: { cartId: Id } }).then((s, err) => {
       if (s) {
-        // console.log(s);
+        //  // console.log(s);
         let records = JSON.parse((s.map(result => result.details))[0]);
-        // console.log("records : ", JSON.stringify(records));
+        //  // console.log("records : ", JSON.stringify(records));
         let index = records.findIndex(x => x.itemId === itemId);
         records.splice(index, 1);
-        // console.log("records after ",records);
+        //  // console.log("records after ",records);
         if (records.length > 0) {
           usercart.update({ details: records }, { where: { cartId: Id } }).then((s, err) => {
             if (s) {
@@ -1150,7 +1164,7 @@ module.exports = (app, db) => {
           }
         }
         let l = itemIDArr.length;
-        console.log(l);
+        // console.log(l);
 
         return res.status(200).json(l);
       }
@@ -1218,10 +1232,10 @@ module.exports = (app, db) => {
   }))
   app.get("/itembysubcategoryName/:name", asyncHandler(async (req, res, next) => {
     let obj = JSON.parse(req.headers.location);
-    console.log(obj["city"])
+    // console.log(obj["city"])
     let city = obj["city"]
     try {
-      console.log("reqheaders", req.headers);
+      // console.log("reqheaders", req.headers);
       let name = req.params.name;
       // let pageno = req.params.pageno;
       // { [Op.like]: `%${name}%`}
@@ -1247,7 +1261,7 @@ module.exports = (app, db) => {
         order: [['created_at', 'DESC']],
         attributes: ['subcategoryName']
       });
-      // console.log(subcategoryResults);
+      //  // console.log(subcategoryResults);
       let subcategoryItemsDetail = {
         count: subcategoryResults.count,
         rows: subcategoryResults.rows
@@ -1261,7 +1275,7 @@ module.exports = (app, db) => {
   }))
   app.get("/itembysubcategoryName/:name/:pageno", asyncHandler(async (req, res, next) => {
     let obj = JSON.parse(req.headers.location);
-    console.log(obj["city"])
+    // console.log(obj["city"])
     let city = obj["city"]
     try {
       let name = req.params.name;
@@ -1270,7 +1284,7 @@ module.exports = (app, db) => {
         order: [['created_at', 'DESC']], where: { subcategoryName: { [Op.like]: `%${name}%` } },
         limit: 8, offset: (pageno - 1) * 8
       });
-      // console.log(subcategoryResults);
+      //  // console.log(subcategoryResults);
       let subcategoryItemsDetail = {
         count: subcategoryResults.count,
         rows: []
@@ -1296,21 +1310,21 @@ module.exports = (app, db) => {
 
   app.delete("/deleteitem/:itemId", asyncHandler(async (req, res, next) => {
     let itemId = req.params.itemId;
-    console.log(itemId);
+    // console.log(itemId);
     await item.destroy({ where: { itemId: itemId } }).then((s, err) => {
-      console.log(s);
+      // console.log(s);
       if (!s) { return res.status(500).send(err) }
       if (s) { return res.send(200).send(s) }
     })
   }))
 
   app.post('/uploaditemimage', parser.single("image"), (req, res) => {
-    console.log(req.file) // to see what is returned to you
-    console.log(req.body.itemId);
+    // console.log(req.file) // to see what is returned to you
+    // console.log(req.body.itemId);
     let imagedata = {};
     imagedata.url = req.file.path;
     imagedata.id = req.file.public_id;
-    console.log(imagedata);
+    // console.log(imagedata);
     image.create({
       imagePath: imagedata.url,
       itemId: req.body.itemId
@@ -1328,7 +1342,7 @@ module.exports = (app, db) => {
     let imagedata = {};
     imagedata.path = req.file.path;
     imagedata.id = req.file.public_id;
-    console.log(imagedata.path);
+    // console.log(imagedata.path);
     image.update({ imagePath: imagedata.path }, { where: { itemId: req.body.itemId } })
       .then((s, err) => {
         if (s) { return res.status(200).send(s) }
@@ -1338,7 +1352,7 @@ module.exports = (app, db) => {
   })
 
   app.get("/itemimage/:itemId", (req, res) => {
-    image.findAll(({ where: { itemId: req.params.itemId } }))
+    image.findAll(({ where: { itemItemId: req.params.itemId } }))
       .then((s, err) => {
         if (!s) { return res.status(404).send("no such item") }
         if (s) {
@@ -1403,12 +1417,12 @@ module.exports = (app, db) => {
   })
 
   app.put('/vendorprofileimageupload', parser.single("image"), async (req, res) => {
-    console.log(req.file) // to see what is returned to you
-    console.log(req.body.vendorId);
+    // console.log(req.file) // to see what is returned to you
+    // console.log(req.body.vendorId);
     let imagedata = {};
     imagedata.url = req.file.path;
     imagedata.id = req.file.public_id;
-    console.log(imagedata);
+    // console.log(imagedata);
     vendor.update({ imagePath: imagedata.url }, { where: { vendorId: req.body.vendorId } }).then((s, err) => {
       if (s) { return res.status(200).send(s) }
       if (err) { return res.status(500).send(err) }
@@ -1432,21 +1446,34 @@ module.exports = (app, db) => {
   }))
 
   app.get("/itemdetails/:itemId", asyncHandler(async (req, res) => {
-    let id = req.params.itemId; console.log(id);
+    let id = req.params.itemId;  // console.log(id);
     ; item.findOne({
       where: { itemId: req.params.itemId }, include: [{
         model: subcategoryname
 
       }, {
+
         model: customization
 
       }]
-    }).then((s) => {
-      // console.log(s);
+    }).then(async (s) => {
+      let photo;
+      //  // console.log(s);
       if (typeof (s) === "undefined" || s === null) {
         return res.status(404).json("not found");
       } else {
-        return res.status(200).send(s);
+        await image.findAll(({ where: { itemItemId: req.params.itemId } }))
+          .then((es, err) => {
+            // if (!es) { return res.status(404).send("no such item") }
+            if (es) {
+              photo = es
+              // console.log("photo ", photo)
+              // return res.status(200).send(s)
+            }
+          })
+        // console.log("s", s)
+
+        return res.status(200).send({ s, photo });
       }
     })
   }))
@@ -1455,7 +1482,7 @@ module.exports = (app, db) => {
     let imagedata = {};
     imagedata.path = req.file.path;
     imagedata.id = req.file.public_id;
-    console.log(imagedata.path);
+    // console.log(imagedata.path);
     users.update({ imagePath: imagedata.path }, { where: { userId: req.body.userId } })
       .then((s, err) => {
         if (s) { return res.status(200).send(s) }
@@ -1484,7 +1511,7 @@ module.exports = (app, db) => {
 
       //2: Get userDetails to add to razorpay order
       let userResults = await users.findOne({ where: { userId: req.body.userId } });
-      // console.log(JSON.stringify(userResults));
+      //  // console.log(JSON.stringify(userResults));
 
       //3: Add the order details to razor pay notes for reference
       let rzPayNotes = {
@@ -1496,7 +1523,7 @@ module.exports = (app, db) => {
         quantity: ${orderResults.itemList[i].quantity},
         price: ${orderResults.itemList[i].Price}`;
       }
-      // console.log(JSON.stringify(rzPayNotes));
+      //  // console.log(JSON.stringify(rzPayNotes));
 
       let rzPayOrderResults = await RzPayInstance.orders.create({
         amount: orderResults.TotalPrice * 100, //In Paisa
@@ -1515,7 +1542,7 @@ module.exports = (app, db) => {
         VendorVendorId: req.body.vendorId,
         orderlistOrderId: orderResults.orderId
       });
-      console.log('price' + req.body.deliveryprice);
+      // console.log('price' + req.body.deliveryprice);
 
       //5 : update RazorPay order id in order table
       await orderlist.update({ rzPayOrderId: rzPayOrderResults.id }, { where: { orderId: orderResults.orderId } });
@@ -1537,7 +1564,7 @@ module.exports = (app, db) => {
       });
 
     } catch (err) {
-      console.log(err);
+      // console.log(err);
       return res.status(500).send(err);
     }
   })
@@ -1550,14 +1577,14 @@ module.exports = (app, db) => {
       let rzsignature = req.body.rzsignature;
       let userId = req.body.userId;
 
-      // console.log(JSON.stringify(req.body));
+      //  // console.log(JSON.stringify(req.body));
       const hmac = crypto.createHmac('sha256', '2MKvC6xQkDXGrcmnKFu3P5iX');
       hmac.update(rzPayOrderId + "|" + rzPayPaymentId);
       let generatedSignature = hmac.digest('hex');
 
       //GET payment details from razorPay
       let rzPaymentDetails = await RzPayInstance.payments.fetch(rzPayPaymentId);
-      // console.log(JSON.stringify(rzPaymentDetails));
+      //  // console.log(JSON.stringify(rzPaymentDetails));
 
       //store payment details in table
       let paymentResults = await payment.create({
@@ -1568,7 +1595,7 @@ module.exports = (app, db) => {
         PaymentMethod: rzPaymentDetails.method,
         orderlistOrderId: orderId
       });
-      // console.log(JSON.stringify(paymentResults));
+      //  // console.log(JSON.stringify(paymentResults));
 
       if (generatedSignature == rzsignature && rzPaymentDetails.status == 'authorized') {
 
@@ -1580,7 +1607,7 @@ module.exports = (app, db) => {
 
         //GET payment details from razorPay
         rzPaymentDetails = await RzPayInstance.payments.fetch(rzPayPaymentId);
-        // console.log(JSON.stringify(rzPaymentDetails));
+        //  // console.log(JSON.stringify(rzPaymentDetails));
 
         //update status of payment to captured in payment table
         await payment.update({ paymentStatus: rzPaymentDetails.status }, { where: { paymentId: paymentResults.paymentId } });
@@ -1596,7 +1623,7 @@ module.exports = (app, db) => {
       }
     }
     catch (err) {
-      console.log(err);
+      // console.log(err);
       return res.status(500).send(err);
     }
   })
@@ -1612,10 +1639,10 @@ module.exports = (app, db) => {
       let errorDesc = `code : ${error.code}, description : ${error.description}, source : ${error.source},
       step : ${error.step}, reason : ${error.reason}`;
 
-      // console.log(errorDesc);
+      //  // console.log(errorDesc);
       //GET error payment details from razorPay
       let rzPaymentDetails = await RzPayInstance.payments.fetch(rzPayPaymentId);
-      // console.log(JSON.stringify(rzPaymentDetails));
+      //  // console.log(JSON.stringify(rzPaymentDetails));
 
       //store error payment details in table
       let paymentResults = await payment.create({
@@ -1630,7 +1657,7 @@ module.exports = (app, db) => {
       return res.status(200).send({ message: "error payment is logged" });
     }
     catch (err) {
-      console.log(err);
+      // console.log(err);
       return res.status(500).send(err);
     }
   })
@@ -1663,7 +1690,7 @@ module.exports = (app, db) => {
       return res.status(200).send({ message: "ignore as payment not done" });
     }
     catch (err) {
-      console.log(err);
+      // console.log(err);
       return res.status(500).send(err);
     }
   })
@@ -1684,7 +1711,7 @@ module.exports = (app, db) => {
 
     orderlist.update({ orderStatus: req.body.status }, { where: { Id: req.body.orderId } })
       .then((s) => {
-        console.log(s);
+        // console.log(s);
 
         if (s == 1) {
 
@@ -1726,7 +1753,7 @@ module.exports = (app, db) => {
       if (!items) {
         items = 6;
       }
-      //console.log(pageNo);
+      // // console.log(pageNo);
       let userOrderResults = await orderlist.findAndCountAll({
         order: [['created_at', 'DESC']], where: { userUserId: userId }
         , limit: items, offset: (pageNo - 1) * items
@@ -1748,9 +1775,9 @@ module.exports = (app, db) => {
   });
 
   app.get("/orderdetails/:orderId", ((req, res) => {
-    // console.log(req.params.orderId);
+    //  // console.log(req.params.orderId);
     orderlist.findOne({ where: { Id: req.params.orderId } }).then((S) => {
-      //console.log(S);
+      // // console.log(S);
       return res.status(200).send(S);
     }).catch((err) => {
       return res.status(400).send(err);
@@ -1779,7 +1806,7 @@ module.exports = (app, db) => {
 
         let ls = s.VendorVendorId;
         const records = s.map(result => result.dataValues)
-        console.log(records[0]["VendorVendorId"]);
+        // console.log(records[0]["VendorVendorId"]);
         return res.status(200).json({ "vendorId": records[0]["VendorVendorId"] });
       }
     })
@@ -1838,11 +1865,11 @@ module.exports = (app, db) => {
   app.get("/foodpage", async (req, res) => {
     // let city =req.headers.Location["city"]
 
-    // console.log("city",(req.headers.location));
+    //  // console.log("city",(req.headers.location));
     let obj = JSON.parse(req.headers.location);
-    console.log(obj["city"])
+    // console.log(obj["city"])
     let city = obj["city"]
-    // console.log("city",city)
+    //  // console.log("city",city)
     try {
       let Breakfast = [];
       let NorthIndian = [];
@@ -1864,12 +1891,12 @@ module.exports = (app, db) => {
         if (s !== null) {
           // res.send(s);
           let len = s.length;
-          // console.log(s);
+          //  // console.log(s);
 
 
-          console.log(len);
+          // console.log(len);
           for (i = 0; i < len; i++) {
-            // console.log(s[i]["itemItemId"]);
+            //  // console.log(s[i]["itemItemId"]);
             let eme = s[i]["itemItemId"];
             let l = await item.findOne({
               where: { itemId: eme },
@@ -1884,11 +1911,11 @@ module.exports = (app, db) => {
 
               }, attributes: ['itemId', 'price', 'itemname', 'VendorVendorId', 'imagePath']
             })
-            console.log(l)
+            // console.log(l)
 
             Healthy.splice(0, 0, l);
 
-            // console.log(arr);
+            //  // console.log(arr);
           }
           //  res.send(arr)
         }
@@ -1897,12 +1924,12 @@ module.exports = (app, db) => {
         if (s !== null) {
           // res.send(s);
           let len = s.length;
-          // console.log(s);
+          //  // console.log(s);
 
 
-          // console.log(len);
+          //  // console.log(len);
           for (i = 0; i < len; i++) {
-            // console.log(s[i]["itemItemId"]);
+            //  // console.log(s[i]["itemItemId"]);
             let eme = s[i]["itemItemId"];
             let l = await item.findOne({
               where: { itemId: eme }, include: {
@@ -1916,10 +1943,10 @@ module.exports = (app, db) => {
 
               }, attributes: ['itemId', 'price', 'itemname', 'VendorVendorId', 'imagePath']
             })
-            //  console.log(l)
+            //   // console.log(l)
             Beverages.splice(0, 0, l);
 
-            // console.log(arr);
+            //  // console.log(arr);
           }
           //  res.send(arr)
         }
@@ -1928,12 +1955,12 @@ module.exports = (app, db) => {
         if (s !== null) {
           // res.send(s);
           let len = s.length;
-          // console.log(s);
+          //  // console.log(s);
 
 
-          console.log(len);
+          // console.log(len);
           for (i = 0; i < len; i++) {
-            // console.log(s[i]["itemItemId"]);
+            //  // console.log(s[i]["itemItemId"]);
             let eme = s[i]["itemItemId"];
             let l = await item.findOne({
               where: { itemId: eme }, include: {
@@ -1947,10 +1974,10 @@ module.exports = (app, db) => {
 
               }, attributes: ['itemId', 'price', 'itemname', 'VendorVendorId', 'imagePath']
             })
-            //  console.log(l)
+            //   // console.log(l)
             SouthIndian.splice(0, 0, l);
 
-            // console.log(arr);
+            //  // console.log(arr);
           }
           //  res.send(arr)
         }
@@ -1973,12 +2000,12 @@ module.exports = (app, db) => {
         if (s !== null) {
           // res.send(s);
           let len = s.length;
-          //console.log(s);
+          // // console.log(s);
 
 
-          console.log(len);
+          // console.log(len);
           for (i = 0; i < len; i++) {
-            // console.log(s[i]["itemItemId"]);
+            //  // console.log(s[i]["itemItemId"]);
             let eme = s[i]["itemItemId"];
             let l = await item.findOne({
               where: { itemId: eme }, include: {
@@ -1992,10 +2019,10 @@ module.exports = (app, db) => {
 
               }, attributes: ['itemId', 'price', 'itemname', 'VendorVendorId', 'imagePath']
             })
-            //  console.log(l)
+            //   // console.log(l)
             Breakfast.splice(0, 0, l);
 
-            // console.log(arr);
+            //  // console.log(arr);
           }
           //  res.send(arr)
         }
@@ -2004,12 +2031,12 @@ module.exports = (app, db) => {
         if (s !== null) {
           // res.send(s) Continental Oriental Desserts Breakfast  North Indian;
           let len = s.length;
-          // console.log(s);
+          //  // console.log(s);
 
 
-          // console.log(len);
+          //  // console.log(len);
           for (i = 0; i < len; i++) {
-            // console.log(s[i]["itemItemId"]);
+            //  // console.log(s[i]["itemItemId"]);
             let eme = s[i]["itemItemId"];
             let l = await item.findOne({
               where: { itemId: eme }, include: {
@@ -2023,10 +2050,10 @@ module.exports = (app, db) => {
 
               }, attributes: ['itemId', 'price', 'itemname', 'VendorVendorId', 'imagePath']
             })
-            //  console.log(l)
+            //   // console.log(l)
             NorthIndian.splice(0, 0, l);
 
-            // console.log(arr1);
+            //  // console.log(arr1);
           }
           //  res.send(arr)
         }
@@ -2036,12 +2063,12 @@ module.exports = (app, db) => {
         if (s !== null) {
           // res.send(s) Continental Oriental Desserts Breakfast  North Indian;
           let len = s.length;
-          // console.log(s);
+          //  // console.log(s);
 
 
-          console.log(len);
+          // console.log(len);
           for (i = 0; i < len; i++) {
-            // console.log(s[i]["itemItemId"]);
+            //  // console.log(s[i]["itemItemId"]);
             let eme = s[i]["itemItemId"];
             let l = await item.findOne({
               where: { itemId: eme }, include: {
@@ -2055,10 +2082,10 @@ module.exports = (app, db) => {
 
               }, attributes: ['itemId', 'price', 'itemname', 'VendorVendorId', 'imagePath']
             })
-            //  console.log(l)
+            //   // console.log(l)
             Continental.splice(0, 0, l);
 
-            // console.log(arr2);
+            //  // console.log(arr2);
           }
           //  res.send(arr)
         }
@@ -2067,12 +2094,12 @@ module.exports = (app, db) => {
         if (s !== null) {
           // res.send(s) Continental Oriental Desserts Breakfast  North Indian;
           let len = s.length;
-          // console.log(s);
+          //  // console.log(s);
 
 
-          console.log(len);
+          // console.log(len);
           for (i = 0; i < len; i++) {
-            // console.log(s[i]["itemItemId"]);
+            //  // console.log(s[i]["itemItemId"]);
             let eme = s[i]["itemItemId"];
             let l = await item.findOne({
               where: { itemId: eme }, include: {
@@ -2086,10 +2113,10 @@ module.exports = (app, db) => {
 
               }, attributes: ['itemId', 'price', 'itemname', 'VendorVendorId', 'imagePath']
             })
-            //  console.log(l)
+            //   // console.log(l)
             Oriental.splice(0, 0, l);
 
-            // console.log(arr3);
+            //  // console.log(arr3);
           }
           //  res.send(arr)
         }
@@ -2098,12 +2125,12 @@ module.exports = (app, db) => {
         if (s !== null) {
           // res.send(s) Continental Oriental Desserts Breakfast  North Indian;
           let len = s.length;
-          // console.log(s);
+          //  // console.log(s);
 
 
-          // console.log(len);
+          //  // console.log(len);
           for (i = 0; i < len; i++) {
-            // console.log(s[i]["itemItemId"]);
+            //  // console.log(s[i]["itemItemId"]);
             let eme = s[i]["itemItemId"];
             let l = await item.findOne({
               where: { itemId: eme }, include: {
@@ -2117,10 +2144,10 @@ module.exports = (app, db) => {
 
               }, attributes: ['itemId', 'price', 'itemname', 'VendorVendorId', 'imagePath']
             })
-            //  console.log(l)
+            //   // console.log(l)
             Desserts.splice(0, 0, l);
 
-            // console.log(arr4);
+            //  // console.log(arr4);
           }
           //  res.send(arr)
         }
@@ -2129,12 +2156,12 @@ module.exports = (app, db) => {
         if (s !== null) {
           // res.send(s) Continental Oriental Desserts Breakfast  North Indian;
           let len = s.length;
-          // console.log(s);
+          //  // console.log(s);
 
 
-          // console.log(len);
+          //  // console.log(len);
           for (i = 0; i < len; i++) {
-            // console.log(s[i]["itemItemId"]);
+            //  // console.log(s[i]["itemItemId"]);
             let eme = s[i]["itemItemId"];
             let l = await item.findOne({
               where: { itemId: eme }, include: {
@@ -2148,10 +2175,10 @@ module.exports = (app, db) => {
 
               }, attributes: ['itemId', 'price', 'itemname', 'VendorVendorId', 'imagePath']
             })
-            console.log(l)
+            // console.log(l)
             Regional.splice(0, 0, l);
 
-            // console.log(arr6);
+            //  // console.log(arr6);
           }
           //  res.send(arr)
         }
@@ -2160,12 +2187,12 @@ module.exports = (app, db) => {
         if (s !== null) {
           // res.send(s) Continental Oriental Desserts Breakfast  North Indian;
           let len = s.length;
-          // console.log(s);
+          //  // console.log(s);
 
 
-          // console.log(len);
+          //  // console.log(len);
           for (i = 0; i < len; i++) {
-            // console.log(s[i]["itemItemId"]);
+            //  // console.log(s[i]["itemItemId"]);
             let eme = s[i]["itemItemId"];
             let l = await item.findOne({
               where: { itemId: eme }, include: {
@@ -2179,10 +2206,10 @@ module.exports = (app, db) => {
 
               }, attributes: ['itemId', 'price', 'itemname', 'VendorVendorId', 'imagePath']
             })
-            console.log(l)
+            // console.log(l)
             Platter.splice(0, 0, l);
 
-            // console.log(arr6);
+            //  // console.log(arr6);
           }
           //  res.send(arr)
         }
@@ -2191,18 +2218,18 @@ module.exports = (app, db) => {
       //   if (s !== null) {
       //     // res.send(s) Continental Oriental Desserts Breakfast  North Indian;
       //     let len = s.length;
-      //     // console.log(s);
+      //     //  // console.log(s);
 
 
-      //     // console.log(len);
+      //     //  // console.log(len);
       //     for (i = 0; i < len; i++) {
-      //       // console.log(s[i]["itemItemId"]);
+      //       //  // console.log(s[i]["itemItemId"]);
       //       let eme = s[i]["itemItemId"];
       //       let l = await item.findOne({ where: { itemId: eme }, attributes: ['itemId', 'price', 'itemname', 'VendorVendorId', 'imagePath'] })
-      //       console.log(l)
+      //        // console.log(l)
       //       Biscuits.splice(0, 0, l);
 
-      //       // console.log(arr6);
+      //       //  // console.log(arr6);
       //     }
       //     //  res.send(arr)
       //   }
@@ -2211,12 +2238,12 @@ module.exports = (app, db) => {
         if (s !== null) {
           // res.send(s) Continental Oriental Desserts Breakfast  North Indian;
           let len = s.length;
-          // console.log(s);
+          //  // console.log(s);
 
 
-          // console.log(len);
+          //  // console.log(len);
           for (i = 0; i < len; i++) {
-            // console.log(s[i]["itemItemId"]);
+            //  // console.log(s[i]["itemItemId"]);
             let eme = s[i]["itemItemId"];
             let l = await item.findOne({
               where: { itemId: eme }, include: {
@@ -2230,10 +2257,10 @@ module.exports = (app, db) => {
 
               }, attributes: ['itemId', 'price', 'itemname', 'VendorVendorId', 'imagePath']
             })
-            console.log(l)
+            // console.log(l)
             Snacks.splice(0, 0, l);
 
-            // console.log(arr6);
+            //  // console.log(arr6);
           }
           //  res.send(arr)
         }
@@ -2261,7 +2288,7 @@ module.exports = (app, db) => {
 
   app.get("/sugarSpicesPage", asyncHandler(async (req, res, next) => {
     let obj = JSON.parse(req.headers.location);
-    console.log(obj["city"])
+    // console.log(obj["city"])
     let city = obj["city"]
     try {
       let BakeryItems = [];
@@ -2391,23 +2418,23 @@ module.exports = (app, db) => {
 
         })
         let value = arr.map(a => a.ItemId);
-        console.log(value);
+        // console.log(value);
         for (i = 0; i < value.length; i++) {
           let v = value[i];
-          console.log(i);
+          // console.log(i);
           await item.findOne({ where: { itemId: v }, attributes: ["itemId", "imagePath", "itemname", "price", "VendorVendorId"] }).then((l, err) => {
             if (l) {
-              //  console.log(l["dataValues"]);
+              //   // console.log(l["dataValues"]);
 
 
               //  let h=l.map(result => result.dataValues)
               Id.push(l["dataValues"]);
-              console.log(Id);
+              // console.log(Id);
             };
             if (err) { return res.send(err) }
           })
         }
-        // console.log(l);
+        //  // console.log(l);
         return res.status(200).send(Id);
       }
 
@@ -2467,7 +2494,7 @@ module.exports = (app, db) => {
   })
   app.get("/food", (async (req, res) => {
     let obj = JSON.parse(req.headers.location);
-    console.log(obj["city"])
+    // console.log(obj["city"])
     let city = obj["city"]
     item.findAll({
       where: { category: "food" },
@@ -2488,7 +2515,7 @@ module.exports = (app, db) => {
   }))
   app.get("/sugerandspices", (async (req, res) => {
     let obj = JSON.parse(req.headers.location);
-    console.log(obj["city"])
+    // console.log(obj["city"])
     let city = obj["city"]
     item.findAll({
       where: { category: "Sugar & Spices" }, include: {
@@ -2661,7 +2688,7 @@ module.exports = (app, db) => {
     let result = {}
     await item.findAll({ where: { itemname: { [Op.like]: `%${query}%` } } }).then((s, err) => {
       if (typeof s == "undefined" || typeof s == null) {
-        console.log("no item");
+        // console.log("no item");
       } else {
         result.item = s
       }
@@ -2671,14 +2698,14 @@ module.exports = (app, db) => {
     })
     await subcategoryname.findAll({ where: { subcategoryName: { [Op.like]: `%${query}%` } } }).then((s, err) => {
       if (typeof s == "undefined" || typeof s == null) {
-        console.log("no item");
+        // console.log("no item");
       } else {
         result.subcategoryname = s
       }
     })
     await vendor.findAll({ where: { firstname: { [Op.like]: `%${query}%` } }, attributes: ['firstname', 'lastname', 'vendorId'] }).then((s) => {
       if (typeof s == "undefined" || typeof s == null) {
-        console.log("no vendor");
+        // console.log("no vendor");
       } else {
         result.vendorname = s
       }
@@ -2689,7 +2716,7 @@ module.exports = (app, db) => {
 
   app.get("/popularcuisine/:pageno", async (req, res) => {
     let pageNo = Number(req.params.pageno);
-    //console.log(pageNo);
+    // // console.log(pageNo);
     let userResults = await Dashboard.findAndCountAll({
       include: {
         model: item,
@@ -2721,7 +2748,7 @@ module.exports = (app, db) => {
     orderlist.count().then((s) => {
       if (s) {
         let r = (s).toString();
-        console.log(r);
+        // console.log(r);
         return res.status(200).send(r);
       }
     })
@@ -2732,7 +2759,7 @@ module.exports = (app, db) => {
     orderlist.count({ where: { [Op.and]: [{ orderStatus: "DeliveredtoCustomer" }, { VendorVendorId: vendorId }] } }).then((s, err) => {
       if (!err) {
         let r = (s).toString();
-        console.log(r);
+        // console.log(r);
         return res.status(200).send(r);
       }
       if (err) {
@@ -2745,7 +2772,7 @@ module.exports = (app, db) => {
     orderlist.count({ where: { orderStatus: "DeliveredtoCustomer" } }).then((s, err) => {
       if (!err) {
         let r = (s).toString();
-        console.log(r);
+        // console.log(r);
         return res.status(200).send(r);
       }
       if (err) {
@@ -2759,7 +2786,7 @@ module.exports = (app, db) => {
     orderlist.count({ where: { [Op.and]: [{ orderStatus: "RejectedBychef" }, { VendorVendorId: vendorId }] } }).then((s, err) => {
       if (!err) {
         let r = (s).toString();
-        console.log(r);
+        // console.log(r);
         return res.status(200).send(r);
       }
       if (err) {
@@ -2772,7 +2799,7 @@ module.exports = (app, db) => {
     orderlist.count({ where: { orderStatus: "RejectedBychef" } }).then((s, err) => {
       if (!err) {
         let r = (s).toString();
-        console.log(r);
+        // console.log(r);
         return res.status(200).send(r);
       }
       if (err) {
@@ -2790,7 +2817,7 @@ module.exports = (app, db) => {
       raw: true,
     }).then((s, err) => {
       if (!err) {
-        console.log(s);
+        // console.log(s);
         return res.status(200).send(s);
       }
       if (err) {
@@ -2806,7 +2833,7 @@ module.exports = (app, db) => {
       raw: true,
     }).then((s) => {
 
-      // console.log(r);
+      //  // console.log(r);
       return res.status(200).send(s);
     })
   })
@@ -2880,7 +2907,7 @@ module.exports = (app, db) => {
     users.count().then((s) => {
       if (s) {
         let r = (s).toString();
-        console.log(r);
+        // console.log(r);
         return res.status(200).send(r);
       }
     })
@@ -2890,7 +2917,7 @@ module.exports = (app, db) => {
     vendor.count().then((s) => {
       if (s) {
         let r = (s).toString();
-        console.log(r);
+        // console.log(r);
         return res.status(200).send(r);
       }
     })
@@ -2951,10 +2978,10 @@ module.exports = (app, db) => {
   }))
   app.get("/salesbymonth/:vendorId/:date", async (req, res) => {
     let fromDate = (moment(req.params.date, 'YYYY-MM-DD')).format('YYYY/MM/DD')
-    console.log("fromDate", fromDate);
+    // console.log("fromDate", fromDate);
     let toDate = moment(fromDate.add(1, 'months')).format('YYYY/MM/DD')
 
-    console.log("toDate", toDate);
+    // console.log("toDate", toDate);
     let vendorId = req.params.vendorId
     let r = await orderlist.findAll({
       where: {
@@ -2971,13 +2998,13 @@ module.exports = (app, db) => {
 
       group: ["VendorVendorId"]
     })
-    console.log(r);
+    // console.log(r);
     res.send(r)
 
   })
   app.get("/itembysubcategory/:name", asyncHandler(async (req, res, next) => {
     try {
-      console.log("reqheaders", req.headers);
+      // console.log("reqheaders", req.headers);
       let name = req.params.name;
       // let pageno = req.params.pageno;
       // { [Op.like]: `%${name}%`}
@@ -3003,7 +3030,7 @@ module.exports = (app, db) => {
         attributes: ['itemname', 'imagePath', 'price', 'itemId']
       });
 
-      //  console.log(subcategoryResults);
+      //   // console.log(subcategoryResults);
       let subcategoryItemsDetail = {
         count: subcategoryResults.count,
         rows: subcategoryResults.rows
@@ -3031,7 +3058,7 @@ module.exports = (app, db) => {
   app.post("/categorywithsubcategory", asyncHandler(async (req, res, next) => {
     let cat = req.body.category
     let subcats = req.body.subcategory
-    console.log("subcat", subcat, subcat.length)
+    // console.log("subcat", subcat, subcat.length)
     categoryname.create({
       categoryName: cat
     }).then(async (s, err) => {
@@ -3059,8 +3086,17 @@ module.exports = (app, db) => {
   }))
   app.get("/allsubcategory", asyncHandler(async (req, res, next) => {
     subcat.findAll().then((s, err) => {
-      console.log("s,", s)
+      // console.log("s,", s)
       return res.status(200).send(s)
+    })
+  }))
+  app.put("/updatesubcategoryname", asyncHandler(async (req, res, next) => {
+    // console.log(req.body)
+    subcat.update({ subcategoryName: req.body.name }, { where: { Id: req.body.subcatId } }).then((s) => {
+      if (s) {
+        // console.log("s", s)
+        return res.status(200).send("updayed")
+      }
     })
   }))
 };

@@ -6,15 +6,15 @@ const geolib = require('geolib');
 const users = require('../../models/users');
 
 module.exports = (app, db) => {
-    const { vendor,Invoice,orderlist,DeliveryPartner,users  } = db;
+    const { vendor, Invoice, orderlist, DeliveryPartner, users } = db;
 
     // Function that will be called to refresh authorization
     const refreshAuthLogic = (failedRequest) => {
         process.env.DUNZO_TOKEN = undefined;
-        // console.log('Token Expired');
+        //  // console.log('Token Expired');
         getToken().then(tokenRefreshResponse => {
             failedRequest.response.config.headers['Authorization'] = tokenRefreshResponse;
-            // console.log(tokenRefreshResponse);
+            //  // console.log(tokenRefreshResponse);
             return Promise.resolve();
         });
     }
@@ -46,10 +46,10 @@ module.exports = (app, db) => {
         }
     }
 
-    const calculateDeliveryChargeUsingDunzo = async (req,res,vendorLocation,userLocation) => {
-        try{
+    const calculateDeliveryChargeUsingDunzo = async (req, res, vendorLocation, userLocation) => {
+        try {
             let result = await getToken();
-            // console.log(JSON.stringify(vendorLocation) + ':' + JSON.stringify(userLocation));
+            //  // console.log(JSON.stringify(vendorLocation) + ':' + JSON.stringify(userLocation));
             if (result.error) {
                 return res.status(result.error.status).json(result.error.message);
             }
@@ -70,33 +70,31 @@ module.exports = (app, db) => {
                         'category_id': 'pickup_drop'
                     }
                 });
-                if(response.data.distance > 8)
-                {
-                    return res.status(400).json({message:'distance is greater than 8 kms'})
+                if (response.data.distance > 8) {
+                    return res.status(400).json({ message: 'distance is greater than 8 kms' })
                 }
                 return res.status(200).json({
                     partner: 'Dunzo',
                     price: response.data.estimated_price,
-                    location : {
-                      pickup : {
-                        lat :  Number(vendorLocation.lat),
-                        lng :  Number(vendorLocation.long),
-                      },
-                      drop : {
-                        lat : userLocation.lat,
-                        lng : userLocation.lng,
-                      }
+                    location: {
+                        pickup: {
+                            lat: Number(vendorLocation.lat),
+                            lng: Number(vendorLocation.long),
+                        },
+                        drop: {
+                            lat: userLocation.lat,
+                            lng: userLocation.lng,
+                        }
                     }
                 });
             }
         }
-        catch(err)
-        {
+        catch (err) {
             throw err;
         }
     }
 
-    const calculateDistanceUsingLatLong = async (req,res,vendorLocation,userLocation)=>{
+    const calculateDistanceUsingLatLong = async (req, res, vendorLocation, userLocation) => {
         let distInMetres = geolib.getPreciseDistance(
             { latitude: vendorLocation.lat, longitude: vendorLocation.long },
             { latitude: userLocation.lat, longitude: userLocation.lng }
@@ -109,59 +107,51 @@ module.exports = (app, db) => {
         try {
             //Get Lat long details on vendor
             let vendorId = req.body.vendorId;
-            let vendorLocation = await vendor.findOne({where:{vendorId:vendorId}, attributes:['lat','long']});
+            let vendorLocation = await vendor.findOne({ where: { vendorId: vendorId }, attributes: ['lat', 'long'] });
             let userLocation = JSON.parse(req.headers.location);
-            if(!vendorLocation.lat || !vendorLocation.long)
-            {
-                return res.status(400).json({message : 'The vendor Location is not set'});
+            if (!vendorLocation.lat || !vendorLocation.long) {
+                return res.status(400).json({ message: 'The vendor Location is not set' });
             }
-            if(!userLocation.lat || !userLocation.lng || !userLocation.city)
-            {
-                return res.status(400).json({message : 'The User Location is not set'});
+            if (!userLocation.lat || !userLocation.lng || !userLocation.city) {
+                return res.status(400).json({ message: 'The User Location is not set' });
             }
-            if(userLocation.city == 'Gurugram' || userLocation.city == 'Gurugaon')
-            {
-                await calculateDeliveryChargeUsingDunzo(req,res,vendorLocation, userLocation);
+            if (userLocation.city == 'Gurugram' || userLocation.city == 'Gurugaon') {
+                await calculateDeliveryChargeUsingDunzo(req, res, vendorLocation, userLocation);
             }
-            else  if(userLocation.city == 'Noida')
-            {
+            else if (userLocation.city == 'Noida') {
                 let estimated_price = 0;
-                let distance = await calculateDistanceUsingLatLong(req,res,vendorLocation, userLocation) + 0.6;
-                if(distance <= 4)
-                {
+                let distance = await calculateDistanceUsingLatLong(req, res, vendorLocation, userLocation) + 0.6;
+                if (distance <= 4) {
                     estimated_price = 40;
                 }
-                else if(distance <= 8)
-                {
+                else if (distance <= 8) {
                     estimated_price = 40 + (Math.round(distance - 4) * 10);
                 }
-                else
-                {
-                    return res.status(400).json({message : 'distance is greater than 8 kms'});
+                else {
+                    return res.status(400).json({ message: 'distance is greater than 8 kms' });
                 }
                 return res.status(200).json({
                     partner: 'Homemade',
                     price: estimated_price,
-                    location : {
-                      pickup : {
-                        lat : Number(vendorLocation.lat),
-                        lng : Number(vendorLocation.long),
-                      },
-                      drop : {
-                        lat : userLocation.lat,
-                        lng : userLocation.lng,
-                      }
+                    location: {
+                        pickup: {
+                            lat: Number(vendorLocation.lat),
+                            lng: Number(vendorLocation.long),
+                        },
+                        drop: {
+                            lat: userLocation.lat,
+                            lng: userLocation.lng,
+                        }
                     }
                 });
-            } 
+            }
         }
         catch (err) {
-            if(err.response)
-            {
-                let message = {'code' : err.response.data.code,'message' : err.response.data.message};
+            if (err.response) {
+                let message = { 'code': err.response.data.code, 'message': err.response.data.message };
                 return res.status(err.response.status).json(message);
             }
-            else{
+            else {
                 return res.status(500).json(err);
             }
         }
@@ -173,16 +163,16 @@ module.exports = (app, db) => {
             //1: change order status to cookingcompleted
             await orderlist.update({ orderStatus: 'cookingcompleted' }, { where: { Id: req.body.orderId } });
             let orderResults = await orderlist.findOne({ where: { Id: req.body.orderId } });
-            // console.log('orders' + JSON.stringify(orderResults));
+            //  // console.log('orders' + JSON.stringify(orderResults));
             let orderDeliveryAddress = JSON.parse(orderResults.address);
 
             //2: Get Vendor details
             let vendorDetails = await vendor.findOne({ where: { vendorId: req.body.vendorId } });
-            // console.log('vendors' + JSON.stringify(vendorDetails));
+            //  // console.log('vendors' + JSON.stringify(vendorDetails));
 
             //3: Get user details
             let userDetails = await users.findOne({ where: { userId: orderResults.userUserId } })
-            // console.log('users' + JSON.stringify(userDetails));
+            //  // console.log('users' + JSON.stringify(userDetails));
 
             //3: create invoice for vendor
             await Invoice.create({
@@ -197,7 +187,7 @@ module.exports = (app, db) => {
             //4: Get delivery details
             let deliveryDetails = await DeliveryPartner.findOne({ where: { orderlistOrderId: req.body.orderId } });
             let location = JSON.parse(deliveryDetails.location);
-            // console.log('deliveryDetails' + JSON.stringify(deliveryDetails));
+            //  // console.log('deliveryDetails' + JSON.stringify(deliveryDetails));
 
             //5: frame JSON body for post
             let data = {
@@ -239,7 +229,7 @@ module.exports = (app, db) => {
                 'package_approx_value': Number(orderResults.TotalPrice),
                 'special_instructions': 'Food items. Handle with great care!!'
             };
-            // console.log(JSON.stringify(data));
+            //  // console.log(JSON.stringify(data));
 
             //6: For Delivery Partner Dunzo create a task
             if (deliveryDetails.DeliveryPartner == 'Dunzo') {
@@ -252,7 +242,7 @@ module.exports = (app, db) => {
                         "Accept-Language": "en_US"
                     }
                 });
-                // console.log(JSON.stringify(dunzoTaskDetails));
+                //  // console.log(JSON.stringify(dunzoTaskDetails));
                 //7: update Dunzo Id and status in delivery table
                 let orderResults = await DeliveryPartner.update({ partnerStatus: dunzoTaskDetails.data.state, DeliveryRefId: dunzoTaskDetails.data.task_id },
                     { where: { orderlistOrderId: req.body.orderId } });
@@ -261,12 +251,11 @@ module.exports = (app, db) => {
 
         }
         catch (err) {
-            if(err.response)
-            {
-                let message = {'code' : err.response.data.code,'message' : err.response.data.message};
+            if (err.response) {
+                let message = { 'code': err.response.data.code, 'message': err.response.data.message };
                 return res.status(err.response.status).json(message);
             }
-            else{
+            else {
                 return res.status(500).json(err);
             }
         }

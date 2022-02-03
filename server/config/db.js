@@ -90,7 +90,8 @@ sequelize
     console.error('Unable to connect to the database:', err);
   });
 
-// sequelize.sync({ alter: true });
+// sequelize.sync({ alter: true }); 
+// sequelize.sync({ force: true })
 //  if change anything in model then please uncomment the below line
 
 
